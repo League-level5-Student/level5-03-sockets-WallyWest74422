@@ -5,20 +5,38 @@ import java.io.*;
 
 public class ServerGreeter extends Thread {
 	//1. Create an object of the ServerSocket class
-
+ServerSocket ss = new ServerSocket();
 	public ServerGreeter() throws IOException {
 		//2. Initialize the ServerSocket object. In the parameters,
 		//   you must define the port at which the server will listen for connections.
-		
+		ss = new ServerSocket(8080);
+//		ss.setSoTimeout(1000000);
 		//*OPTIONAL* you can set a time limit for the server to wait by using the 
 		//  ServerSocket's setSoTimeout(int timeInMilliSeconds) method
 	}
 
 	public void run() {
 		//3. Create a boolean variable and initialize it to true.
-		
+		boolean bean = true;
 		//4. Make a while loop that continues looping as long as the boolean created in the previous step is true.
-			
+			while(bean) {
+				try {
+					System.out.println("The server is waiting for a client to connect...");
+					Socket socket = ss.accept();
+					System.out.println("A client has connected.");
+					DataInputStream dis = new DataInputStream(socket.getInputStream());
+					dis.readUTF();
+					DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+					dos.writeUTF("Hello client, here is my message to you!");
+					ss.close();
+				}catch(SocketTimeoutException e) {
+					System.out.println("A SocketTimeoutException was caught.");
+					bean = false;
+				}catch(IOException e) {
+					System.out.println("An IOException was caught.");
+					bean = false;
+				}
+			}
 			//5. Make a try-catch block that checks for two types Exceptions: SocketTimeoutException and IOException.
 			//   Put steps 8 - 15 in the try block.
 		
@@ -26,7 +44,7 @@ public class ServerGreeter extends Thread {
 		
 				//9. Create an object of the Socket class and initialize it to serverSocket.accept();
 				//   Change serverSocket to match the ServerSocket member variable you created in step 1.
-				//   The program will wait her until either a client connects or the timeout expires.
+				//   The program will wait here until either a client connects or the timeout expires.
 
 				//10. Let the user know that the client has connected.
 				
@@ -49,6 +67,15 @@ public class ServerGreeter extends Thread {
 
 	public static void main(String[] args) {
 		//16. In a new thread, create an object of the ServerGreeter class and start the thread. Don't forget the try-catch.
-		
+		Thread yarn = new Thread(()-> {
+			try {
+				ServerGreeter sg = new ServerGreeter();
+				sg.run();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+		yarn.start();
 	}
 }
